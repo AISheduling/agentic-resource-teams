@@ -1,0 +1,79 @@
+id: PKG-11
+title: Underspecified masonry at height
+status: checked_against_pdf
+kind: partial
+why_this_kind: Missing work type and actual work height prevent safe selection of crew and equipment.
+
+input:
+  work_description: Кирпичная кладка стены на высоте. Тип стены, сложность, толщина, рабочая высота и способ подачи материалов не указаны.
+  volume: {value: 10, unit: м3}
+  conditions:
+    season: null
+    floor_height_m: null
+    working_height_m: null
+    lifting: null
+  masked_fields: [crew_composition, qualifications, headcount, labor_norm, equipment]
+  resource_catalog:
+    roles: [каменщик 2 разр., каменщик 3 разр., каменщик 4 разр., каменщик 5 разр.]
+    equipment: [подмости, леса, кран башенный]
+  variants:
+    V1: Кирпичная кладка стены на высоте. Тип стены, сложность, толщина, рабочая высота и способ подачи материалов не указаны.
+    V2: Кирпичная кладка стены на высоте, 10 м3
+    V3: 'Подобрать звено для: Кирпичная кладка стены на высоте. Тип стены, сложность, толщина, рабочая высота и способ подачи материалов не указаны.'
+
+sources:
+  - {id: SRC.PROFSTD_MASON, role: professional_standard, use: main}
+  - {id: SRC.TK_INNER_380, role: example, use: main}
+  - {id: SRC.GESN_2022, role: norm, use: context_only}
+
+gold:
+  claims:
+
+    - id: C1
+      entity: каменщик 2 разряда
+      attribute: ограничение допуска
+      value: К самостоятельным верхолазным работам (на высоте более 5 м) не допускаются
+      src: {doc: SRC.PROFSTD_MASON, pdf_page: 4, section: '3.1', quote: К самостоятельным верхолазным работам (на высоте более 5 м) не допускаются}
+      basis: document
+      check: confirmed
+      mandatory: false
+      applicability: Historical 2014 edition; applies to independent work at height as described, not floor height.
+
+    - id: C2
+      entity: внутренние стены 380 мм
+      attribute: средства подмащивания
+      value: подмости свыше 1,2 м до 9 м; леса более 9 м
+      src: {doc: SRC.TK_INNER_380, pdf_page: 2, section: '2.5', quote: используются инвентарные подмости ... применяют леса}
+      basis: document
+      check: confirmed
+      mandatory: false
+      applicability: Only the specified internal-wall card; cannot generalize to unspecified wall.
+
+  derived: []
+
+  admissible_modes: []
+
+  not_found:
+    - {id: U1, what: crew and grades, note: Wall type and complexity missing.}
+    - {id: U2, what: labor rate and duration, note: Applicable norm cannot be selected.}
+    - {id: U3, what: equipment and permits, note: Actual work height and lifting method missing.}
+
+  traps:
+    - {id: T1, wrong: use floor height as actual working height, why: Different variables.}
+    - {id: T2, wrong: assign grade 2 unconditionally, why: Independent work restriction may apply.}
+    - {id: T3, wrong: select scaffolding or crane without conditions, why: Applicability unknown.}
+
+pass_criteria:
+  must:
+    - Ask for wall type, complexity, thickness, working height, lifting and season.
+    - Keep crew, equipment and duration unknown.
+    - State conditional source restrictions without universalizing them.
+  must_not:
+    - Invent a complete mode.
+    - Treat 2014 standard as verified current law.
+
+open_for_expert:
+  - Confirm current professional standard and work-at-height requirements.
+  - Confirm whether partial claims count toward coverage.
+
+notes: Synthetic input and resource catalog; source facts are documentary examples, not observed site data. Expert review pending. PDF page numbering starts at 1.

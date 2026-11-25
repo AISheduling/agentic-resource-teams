@@ -1,0 +1,144 @@
+id: PKG-04
+title: 'Laying precast reinforced concrete lintels with a tower crane: crew composition is absent from the corpus'
+status: checked_against_pdf
+kind: partial
+why_this_kind: 'Time norms, equipment and qualification requirements for the work were found, but the crew composition and headcount were not. Correct system behavior: output what is
+  confirmed and explicitly name the composition and headcount as unknown, without inventing a crew.
+
+  '
+
+input:
+  work_description: 'Укладка сборных железобетонных перемычек над оконными и дверными проёмами в кирпичных стенах башенным краном.
+
+    '
+  volume: {value: 40, unit: проём}
+  conditions:
+    season: null
+    lifting: башенный кран
+  masked_fields: [crew_composition, qualifications, headcount, labor_norm, equipment]
+  resource_catalog:
+    roles: [каменщик 2 разр., каменщик 3 разр., каменщик 4 разр., монтажник-такелажник 2 разр., машинист башенного крана]
+    equipment: [кран башенный, строп четырёхветвевой]
+  variants:
+    V1: полное описание
+    V2: монтаж перемычек, 40 проёмов
+    V3: бригада для установки перемычек в каменных стенах
+
+sources:
+  - {id: SRC.TTK_WALLS, role: example, use: main}
+  - {id: SRC.PROFSTD_MASON, role: professional_standard}
+  - {id: SRC.HIST_ACT, role: history_synthetic}
+
+gold:
+  claims:
+
+    - id: C1
+      entity: укладка сборных железобетонных перемычек оконных и дверных проёмов башенным краном, ЕНиР §Е3-16 №1а, б
+      attribute: time norm
+      value: 0,45 и 0,15 (две строки нормы)
+      unit: чел.-ч на 1 проём
+      src: {doc: SRC.TTK_WALLS, pdf_page: 26, section: 'табл. 6.1, п. 7', quote: башенным краном}
+      basis: document
+      check: confirmed_partly
+      mandatory: false
+      note: 'per table, 71 openings: 0.45 x 71 = 31.95 and 0.15 x 71 = 10.65 person-hours. What the second row (0.15) denotes is not explained in the card'
+
+    - id: C2
+      entity: сборные железобетонные перемычки в каменных стенах
+      attribute: tower crane delivery, sequence
+      value: перемычки над дверными проёмами укладываются по ходу кладки; подача башенными кранами КБ-503 и КБ-403
+      src: {doc: SRC.TTK_WALLS, pdf_page: 23, section: п. 5.4, quote: укладка сборных железобетонных перемычек над дверными проемами по ходу кладки}
+      basis: document
+      check: confirmed
+      mandatory: false
+
+    - id: C3
+      entity: рабочие, принимающие груз от крана на рабочем месте
+      attribute: admission requirement
+      value: обучены, удостоверение стропальщика; радиотелефонная связь с машинистом
+      src: {doc: SRC.TTK_WALLS, pdf_page: 33, section: п. 8.3, quote: удостоверение стропальщика}
+      basis: document
+      check: confirmed
+      mandatory: true
+      why_mandatory: the work is performed with a crane (request condition); the requirement is named explicitly
+
+    - id: C4
+      entity: профессиональный стандарт «Каменщик», трудовая функция B/02.2 «Кладка и разборка простых стен» (уровень 2)
+      attribute: lintel installation as a labor action
+      value: 'включено: «Монтаж в каменных зданиях железобетонных перемычек над оконными и дверными проемами и нишами»'
+      src: {doc: SRC.PROFSTD_MASON, pdf_page: 8, section: п. 3.2.2, quote: Монтаж в каменных зданиях железобетонных перемычек}
+      basis: document
+      check: confirmed
+      mandatory: false
+      note: 'knowledge and skills: installing lintels manually and with lifting equipment, p. 9'
+
+    - id: C5
+      entity: каменщик, особые условия допуска
+      attribute: briefing when using lifting equipment
+      value: инструктаж по выполнению работ с использованием стропального оборудования с отметкой о проверках знаний
+      src: {doc: SRC.PROFSTD_MASON, pdf_page: 4, section: special admission conditions, quote: стропального оборудования}
+      basis: document
+      check: confirmed
+      mandatory: true
+      why_mandatory: the standard explicitly requires it when lifting equipment is used
+
+    - id: C6
+      entity: перемычки в акте о выполненных работах (синтетический документ)
+      attribute: observation
+      value: 25 перемычек уложено вместе с кладкой 66 м3; звено «тройка» 4+3+2; отдельной записи труда на перемычки нет
+      src: {doc: SRC.HIST_ACT, pdf_page: 1, section: разд. 2-3, quote: Укладка сборных железобетонных перемычек}
+      basis: observation
+      check: confirmed_partly
+      mandatory: false
+      note: the history confirms that lintels are laid by a mason crew, but does not give a composition specifically for lintels
+
+  derived:
+    - {id: D1, formula: 'for 40 openings: 40 x 0.45 and 40 x 0.15', value: '18,0 и 6,0 чел.-ч'}
+
+  admissible_modes: []
+  partial_mode:
+    roles: [{role: каменщик, grade: unknown, count: unknown}, {role: рабочий со стропальным допуском, grade: unknown, count: unknown}, {role: машинист башенного крана, grade: unknown,
+        count: 1}]
+    labor:
+      q: 40
+      n: 0,45 (+ строка 0,15, смысл не расшифрован)
+      H: 18.0
+      m: unknown
+      d: undefined
+    why: 'H is computed from the norm, d is not: m is unknown'
+
+  not_found:
+    - {id: U1, what: composition of the crew or team laying lintels, note: 'not found in the technological card, the professional standard, or the history'}
+    - {id: U2, what: headcount and grades of workers, note: no source gives a number}
+    - {id: U3, what: grade of the tower crane operator, note: not specified}
+    - {id: U4, what: 'meaning of the second norm row (0,15)', note: 'the technological card has rows «а» and «б», meaning not disclosed'}
+    - {id: U5, what: a separate GESN norm for lintels, note: no lintels in the verified tables 08-02-001 and 08-02-002}
+    - {id: U6, what: 'm: number of simultaneously working people', note: by the formula d = H / m the duration is not computed until the composition is known; the value of m is not picked
+        to obtain a number (η = 1 does not remove the requirement to justify m)}
+
+  traps:
+    - {id: T1, wrong: 'звено из 3 человек: каменщик 4 + 3 + 2 для перемычек', why: 'this is the masonry crew composition from the act (synthetic), not for lintels'}
+    - {id: T2, wrong: монтажник-такелажник 2 разр. x2 (из ТК 3.01.01.03), why: 'a 15-person crew composition from the exterior walls card, not transferable'}
+    - {id: T3, wrong: '0,15 как норма машиниста', why: the meaning of the row is not established}
+    - {id: T4, wrong: каменщик 5 разряда, why: not in the sources; the standard gives level 2 for function B/02.2}
+
+pass_criteria:
+  must:
+    - norm of 0.45 person-hours per opening with its source and a note about the second row
+    - slinger admission requirement with its source (technological card item 8.3, professional standard p. 4)
+    - H = q·n·k is computed from the norm (18.0 person-hours for 40 openings), and duration d is stated as undefined because m is unknown
+    - 'U1-U3 and U6 are stated as unknown: composition, headcount, crane operator grade, m'
+  must_not:
+    - an invented crew or headcount
+    - values from traps T1-T4
+
+open_for_expert:
+  - how to interpret the two norm rows of ENiR §Е3-16 (workers and crane operator?)
+  - whether to treat the pair «mason + slinger» as the lower bound of the composition
+  - whether d for lintels can be estimated from the lower bound «mason + slinger» (m = 2) or d should be left undefined
+  - 'conditional values: 40 openings, crane, catalog'
+
+notes: 'The key point of the package: the answer «unknown» is also an answer, and it must be partial, not empty. The package checks whether the system can output the confirmed parts
+  and honestly leave the composition empty.
+
+  '

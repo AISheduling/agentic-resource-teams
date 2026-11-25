@@ -1,0 +1,158 @@
+id: PKG-05
+title: 'External walls of 2.5 bricks, crew of 15 people: composition and totals in the card do not agree'
+status: checked_against_pdf
+kind: conflict
+why_this_kind: 'Within a single card the number of masons (10) does not equal the number implied by "4 pair crews" (8), and the total labor input does not agree with the number of workers
+  and shifts. In addition, the ENiR of the card gives 3.8 person-hours/m3, while GESN gives 4.54 (2022). The system must show the discrepancies, not pick one.
+
+  '
+
+input:
+  work_description: 'Кладка простых наружных стен из кирпича толщиной 2,5 кирпича с расшивкой швов, типовой этаж жилого дома.
+
+    '
+  volume: {value: 265, unit: м3}
+  conditions:
+    season: лето
+    shifts: 2
+    lifting: башенный кран
+  masked_fields: [crew_composition, qualifications, equipment, labor_norm, duration]
+  resource_catalog:
+    roles: [каменщик 3 разр., каменщик 4 разр., монтажник-такелажник 2 разр., плотник 2 разр., плотник 4 разр., машинист башенного крана]
+    equipment: [кран башенный, подмости шарнирно-пакетные, установка для подачи раствора]
+  variants:
+    V1: полное описание
+    V2: наружные стены 2,5 кирпича, 265 м3
+    V3: бригада для кладки наружных стен типового этажа
+
+sources:
+  - {id: SRC.TK_OUTER_3, role: example, use: main}
+  - {id: SRC.GESN_2022, role: norm}
+
+gold:
+  claims:
+
+    - id: C1
+      entity: typical floor of a residential building of series 1-447S-34, external wall masonry
+      attribute: crew composition
+      value: '15 человек: каменщик 3 разр. x10; монтажник-такелажник 2 разр. x2; плотник 4 разр. x1; плотник 2 разр. x2'
+      src: {doc: SRC.TK_OUTER_3, pdf_page: 2, section: 'sec. 2, crew composition (begins on p. 1)', quote: каменщик 3 разряда - 10}
+      basis: document
+      check: conflict
+      conflict_with: C2
+      mandatory: true
+      why_mandatory: the card is directly about this work
+
+    - id: C2
+      entity: brick wall masonry with joint pointing
+      attribute: organization
+      value: 4 звена «двойка» в две смены; в звене два каменщика 3 разр.
+      src: {doc: SRC.TK_OUTER_3, pdf_page: 2, section: sec. 2, quote: 4 звеньями «двойка» в две смены}
+      basis: document
+      check: conflict
+      conflict_with: C1
+      mandatory: true
+
+    - id: C3
+      entity: external wall masonry with combined vertical joints, 2.5 bricks thick, ENiR §E3-3B item 4a
+      attribute: time norm and labor input
+      value: 3,8 чел.-ч/м3; 265 м3 -> 1007 чел.-ч
+      src: {doc: SRC.TK_OUTER_3, pdf_page: 9, section: 'table 3, item 1', quote: 'Е3-3Б, 3,8'}
+      basis: document
+      check: conflict
+      conflict_with: [C6]
+      mandatory: false
+
+    - id: C4
+      entity: technical and economic indicators for a typical floor
+      attribute: totals
+      value: 1251,69 чел.-ч; 92,41 маш.-ч; 12,2 смены; выработка 1,73 м3 на рабочего в смену
+      src: {doc: SRC.TK_OUTER_3, pdf_page: 14, section: sec. 8, quote: '1251,69'}
+      basis: document
+      check: conflict
+      mandatory: false
+
+    - id: C6
+      entity: norm 08-02-001-01 (GESN-2022)
+      attribute: labor input of workers
+      value: 4.54
+      unit: чел.-ч/м3
+      src: {doc: SRC.GESN_2022, pdf_page: 10, section: 'table 08-02-001, column 08-02-001-01', quote: 'Средний разряд работы 2,7'}
+      basis: document
+      check: conflict
+      conflict_with: C3
+      mandatory: false
+      note: in the scope of work of GESN-2022 for norms 001-01...001-08 joint pointing is not named
+
+    - id: C7
+      entity: recommended machinery and equipment
+      attribute: list
+      value: кран башенный КБ-100.1 (до 5 т) или КБ-160 (до 8 т) или кран гусеничный МКГ-16 (16 т); установка для подачи раствора СО-126
+      src: {doc: SRC.TK_OUTER_3, pdf_page: 3, section: table 1, quote: Установка для подачи}
+      basis: document
+      check: confirmed
+      mandatory: false
+
+  derived:
+    - {id: D1, formula: 4 звена x 2 каменщика, value: 8, note: versus 10 masons in the crew composition}
+    - {id: D2, formula: '15 чел. x 12,2 смены x 8 ч', value: 1464.0, unit: чел.-ч, note: versus 1251.69 in the totals (less by 14.5 %)}
+    - {id: D3, formula: '1251,69 / 8 / 12,2', value: 12.82, unit: рабочих, note: versus 15 in the composition}
+    - {id: D4, formula: '265 / (1251,69 / 8)', value: 1.69, unit: м3 на рабочего в смену, note: versus 1.73 in the totals}
+    - {id: D5, formula: 'H = q x n: ЕНиР 265 x 3,8; ГЭСН-2022 265 x 4,54', value: '1007; 1203,1 чел.-ч'}
+
+  admissible_modes:
+
+    - mode_id: M1
+      roles: [{role: каменщик, grade: 3, count: 10}, {role: монтажник-такелажник, grade: 2, count: 2}, {role: плотник, grade: 4, count: 1}, {role: плотник, grade: 2, count: 2}]
+      labor_variants:
+        by_ENiR_card: {n: 3.8, H: 1007.0, m_masons: 10, d_hours: 100.7}
+        by_GESN_2022: {n: 4.54, H: 1203.1, m_masons: 10, d_hours: 120.31}
+      equipment: [кран башенный (КБ-100.1 или КБ-160), СО-126]
+      supported_by: [C1, C3, C6, C7]
+      admissible: conditional
+      why: composition taken from the crew list; conflicts with C2
+
+    - mode_id: M2
+      roles: [{role: каменщик, grade: 3, count: 8}, {role: монтажник-такелажник, grade: 2, count: 2}, {role: плотник, grade: 4, count: 1}, {role: плотник, grade: 2, count: 2}]
+      labor_variants:
+        by_ENiR_card: {n: 3.8, H: 1007.0, m_masons: 8, d_hours: 125.88}
+        by_GESN_2022: {n: 4.54, H: 1203.1, m_masons: 8, d_hours: 150.39}
+      equipment: [кран башенный (КБ-100.1 или КБ-160), СО-126]
+      supported_by: [C2, C3, C6, C7]
+      admissible: conditional
+      why: 4 pair crews = 8 masons; the number of other workers is taken from the crew list
+
+  not_found:
+    - {id: U1, what: grade of the tower crane operator, note: not specified in the card; GESN gives only hours}
+    - {id: U2, what: winter conditions, note: the card is for summer only}
+    - {id: U3, what: which composition (10 or 8 masons) is correct, note: expert decision}
+    - {id: U4, what: proof that m = 10 (or 8) is the number of simultaneously working people, note: 'both values of m are taken from the crew composition; the card does not say that
+        all masons work on the same work section simultaneously, and η = 1 does not verify this. The other workers (riggers, carpenters) are not included in H and m'}
+
+  traps:
+    - {id: T1, wrong: бригада «15 каменщиков», why: 'the crew has 10 masons, the other workers are of other trades'}
+    - {id: T2, wrong: 'считать итог 12,2 смены, 15 человек и 1251,69 чел.-ч согласованными', why: 'they do not agree (D2, D3)'}
+    - {id: T3, wrong: averaging ENiR and GESN-2022, why: averaging is prohibited}
+    - {id: T4, wrong: '08-02-001-07: 4,38', why: the wall is external}
+    - {id: T5, wrong: 'применить K = 1,13 (зима, СПб из ТТК)', why: in this card the work is performed in summer}
+
+pass_criteria:
+  must:
+    - crew composition (10/2/1/2) with its source and a note that the number of masons does not agree with "4 pair crews"
+    - Two norm values (3.8; 4.54) separately, with sources and applicability caveats.
+    - do not call the card's totals consistent
+    - 'H and d separately: 100.7 / 120.31 h at m=10; 125.88 / 150.39 h at m=8.'
+    - U1-U4 are unknown
+  must_not:
+    - averaged norm
+    - values from traps T1-T5
+
+open_for_expert:
+  - how to correctly read "4 pair crews in two shifts" with 10 masons (possibly 2 crews per shift)
+  - whether to consider D2-D4 a defect of the card or a consequence of a different counting method
+  - whether to take m equal to the number of masons in the crew at η = 1, if the card itself states 12.2 shifts
+  - 'hypothetical values: the resource catalog and the crane type'
+
+notes: 'The calculations D1-D5 are mine; they are not claims of the source. The discrepancies confirm that the presence of a number in a document does not mean the document is consistent.
+
+  '
