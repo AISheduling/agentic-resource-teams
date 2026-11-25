@@ -1,0 +1,101 @@
+id: PKG-10
+title: 'Winter masonry: conditional coefficient'
+status: checked_against_pdf
+kind: partial
+why_this_kind: Tests geographic applicability of a winter coefficient.
+
+input:
+  work_description: Кладка наружных несущих стен толщиной 770 мм из керамических камней с облицовкой лицевым кирпичом. Январь, город не указан.
+  volume: {value: 10, unit: м3}
+  conditions:
+    season: winter
+    month: January
+    region: null
+    floor_height_m: 3
+    lifting: башенный кран
+  masked_fields: [crew_composition, qualifications, headcount, labor_norm, equipment]
+  resource_catalog:
+    roles: [каменщик 2 разр., каменщик 3 разр., каменщик 4 разр., каменщик 5 разр.]
+    equipment: [кран башенный, подмости, радиотелефонная связь]
+  variants:
+    V1: Кладка наружных несущих стен толщиной 770 мм из керамических камней с облицовкой лицевым кирпичом. Январь, город не указан.
+    V2: Кладка наружных несущих стен толщиной 770 мм из керамических камней с облицовкой лицевым кирпичом, 10 м3
+    V3: 'Подобрать звено для: Кладка наружных несущих стен толщиной 770 мм из керамических камней с облицовкой лицевым кирпичом. Январь, город не указан.'
+
+sources:
+  - {id: SRC.TTK_WALLS, role: example, use: main}
+  - {id: SRC.GESN_2022, role: norm, use: context_only}
+
+gold:
+  claims:
+
+    - id: C1
+      entity: кладка наружных стен 770 мм
+      attribute: состав звена
+      value: каменщик 4-5 разр. x1; каменщик 3 разр. x1; каменщик 2 разр. x2
+      src: {doc: SRC.TTK_WALLS, pdf_page: 15, section: '5.2', quote: К - каменщик 4- 5 разряда; ... К - каменщик 3 разряда; ... К - каменщик 2 разряда; ... К - каменщик 2 разряда.}
+      basis: document
+      check: confirmed
+      mandatory: false
+      applicability: Sections 5–7 card example.
+
+    - id: C2
+      entity: кладка наружных стен 770 мм
+      attribute: норма времени
+      value: 3.1
+      src: {doc: SRC.TTK_WALLS, pdf_page: 26, section: 'табл. 6.1, п. 1', quote: '3,1'}
+      basis: document
+      check: confirmed
+      mandatory: false
+      unit: чел.-ч/м3
+
+    - id: C3
+      entity: кладка наружных стен 770 мм
+      attribute: поправочный коэффициент
+      value: 1.13
+      src: {doc: SRC.TTK_WALLS, pdf_page: 32, section: примечание к таблицам 6.1–6.3, quote: 'К= 1,13'}
+      basis: document
+      check: confirmed
+      mandatory: false
+      applicability: December–March, Saint Petersburg, card rates only.
+
+    - id: C4
+      entity: кладка наружных стен 770 мм
+      attribute: допуск
+      value: обучение, удостоверение стропальщика и устойчивая радиотелефонная связь
+      src: {doc: SRC.TTK_WALLS, pdf_page: 33, section: '8.3', quote: удостоверение стропальщика. ... устойчивая радиотелефонная связь.}
+      basis: document
+      check: confirmed
+      mandatory: true
+      applicability: Workers receiving crane loads in the card scenario.
+
+  derived:
+    - {id: D1, formula: H_base = 10 * 3.1, value: 31, unit: чел.-ч}
+    - {id: D2, formula: H_SPb = 10 * 3.1 * 1.13, value: 35.03, unit: чел.-ч, note: 'Counterfactual only: if Saint Petersburg applicability is established.'}
+    - {id: D3, formula: d_SPb = 35.03 / 4, value: 8.7575, unit: ч, note: 'Conditional illustration, not the actual duration.'}
+
+  admissible_modes: []
+
+  not_found:
+    - {id: U1, what: applicable winter coefficient, note: Region missing.}
+    - {id: U2, what: actual H and d, note: Cannot determine without applicable k.}
+    - {id: U3, what: crane load receiver credentials, note: Catalog lists grades only.}
+
+  traps:
+    - {id: T1, wrong: k = 1.13 unconditionally, why: Geographic applicability not established.}
+    - {id: T2, wrong: k = 1 as actual winter value, why: No support for defaulting to summer.}
+    - {id: T3, wrong: apply 1.13 to any GESN rate, why: Card refers to specific ENiR-based tables.}
+
+pass_criteria:
+  must:
+    - Recover candidate crew and base rate.
+    - Report k and actual duration as unknown; show conditional calculation separately.
+    - Identify crane-load receiver requirement.
+  must_not:
+    - Return a fully admissible mode without missing evidence.
+
+open_for_expert:
+  - Confirm location and applicable winter norm.
+  - Confirm crew permits and equipment.
+
+notes: Synthetic input and resource catalog; source facts are documentary examples, not observed site data. Expert review pending. PDF page numbering starts at 1.

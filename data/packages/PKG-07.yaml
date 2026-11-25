@@ -1,0 +1,96 @@
+id: PKG-07
+title: 'Hung ventilated facade with porcelain stoneware cladding: not in the data corpus'
+status: checked_against_pdf
+kind: negative
+why_this_kind: 'The corpus is devoted to brick masonry. For ventilated facades there is no crew composition, no norms, and no equipment. Nearby "similar" materials exist (brick cladding,
+  an air gap in masonry) that are easy to mistake for an answer. Correct behavior: "no data" without invented roles and norms.
+
+  '
+
+input:
+  work_description: 'Монтаж навесной вентилируемой фасадной системы с облицовкой керамогранитными плитами по металлической подсистеме на жилом здании.
+
+    '
+  volume: {value: 200, unit: м2}
+  conditions:
+    season: null
+    lifting: строительный подъёмник
+  masked_fields: [crew_composition, qualifications, headcount, labor_norm, equipment]
+  resource_catalog:
+    roles: [монтажник фасадных систем, каменщик 4 разр., каменщик 2 разр., такелажник 2 разр., верхолаз]
+    equipment: [фасадный подъёмник, кран башенный, перфоратор]
+  variants:
+    V1: полное описание
+    V2: вентилируемый фасад, 200 м2
+    V3: бригада для навесной фасадной системы
+
+sources:
+  - {id: SRC.TTK_WALLS, role: example}
+  - {id: SRC.TK_INNER_380, role: example}
+  - {id: SRC.TK_OUTER_3, role: example}
+  - {id: SRC.LABOR_7353, role: labor_process_card}
+  - {id: SRC.GESN_2022, role: norm}
+  - {id: SRC.PROFSTD_MASON, role: professional_standard}
+
+gold:
+  claims: []
+  absence_checks:
+    method: pdftotext on each PDF, case-insensitive, substring search
+    terms:
+      - вентилируем
+      - навесн* фасад
+      - фасадн* систем
+      - подсистем
+    result:
+      SRC.TTK_WALLS: 0
+      SRC.TK_INNER_380: 0
+      SRC.TK_OUTER_3: 0
+      SRC.LABOR_7353: 0
+      SRC.GESN_2022: 0
+      SRC.PROFSTD_MASON: 0
+    extra: 'professional standard «Каменщик»: the word «фасад» does not occur (substring search for «фасад»)'
+    caveat: text search is not a substitute for reading; scans and drawings were not checked
+  near_misses:
+    - id: N1
+      src: {doc: SRC.GESN_2022, pdf_page: 1, section: item 1.8.6, quote: с воздушной прослойкой и утеплением}
+      what: masonry with an air gap and insulation boards (table 08-02-015)
+      why_not: brick masonry, not a substructure with slab cladding
+    - id: N2
+      src: {doc: SRC.GESN_2022, pdf_page: 15, section: table 08-02-010, quote: с облицовкой лицевым кирпичом}
+      what: wall masonry with facing brick, stone cladding
+      why_not: brick cladding, not a hung system
+    - id: N3
+      src: {doc: SRC.TTK_WALLS, pdf_page: 1, section: item 1.2, quote: с облицовкой лицевым кирпичом}
+      what: exterior walls with facing brick cladding
+      why_not: brick cladding
+
+  admissible_modes: []
+
+  not_found:
+    - {id: U1, what: crew composition for installing a ventilated facade, note: not in the corpus}
+    - {id: U2, what: 'qualifications and permits (work at height, etc.)', note: the professional standard «Каменщик» does not apply to facade systems}
+    - {id: U3, what: labor-effort and time norms, note: Not in verified tables of GESN-2022 section 2.}
+    - {id: U4, what: equipment and rigging, note: none}
+
+  traps:
+    - {id: T1, wrong: '«pair» crew: mason grade 4 + mason grade 2', why: 'composition for brick masonry, not for hung systems'}
+    - {id: T2, wrong: norm 08-02-010-xx or 08-02-015-xx as a facade norm, why: 'masonry with brick cladding / an air gap (N1, N2)'}
+    - {id: T3, wrong: 'facade installers working at height, rope-access workers, any roles «from general knowledge»', why: no confirmation in the sources}
+    - {id: T4, wrong: a slinger permit requirement as mandatory for facade installation, why: 'the references relate to mason work with a crane (technological card item 8.3, professional
+        standard p. 4)'}
+
+pass_criteria:
+  must:
+    - answer «no data in the corpus» for composition, qualifications, norms, and equipment
+    - when mentioning close materials (N1-N3), note that they are not applicable
+  must_not:
+    - invented roles, grades, headcount, norms, or equipment
+    - values from traps T1-T4
+
+open_for_expert:
+  - whether to accept substring search as sufficient confirmation of absence
+  - whether «no data» is enough or a refusal with a recommendation to seek an external standard is needed
+
+notes: 'This is the only package where the best possible score is obtained with an empty list of claims. It tests whether the system fills gaps with plausible inventions.
+
+  '

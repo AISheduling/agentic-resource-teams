@@ -1,0 +1,169 @@
+id: PKG-02
+title: External load-bearing walls 770 mm made of ceramic blocks with facing brick cladding, typical floor of section 5
+status: checked_against_pdf
+kind: standard
+why_this_kind: 'The crew composition and the time norm for the 770 mm wall are named directly in a single technological card. This is a "standard" package, but with a trap: GESN contains
+  plausible norms for external walls (08-02-008-01 and 08-02-010), and neither of them applies to a 770 mm wall with cladding.
+
+  '
+
+input:
+  work_description: 'Кладка наружных несущих стен толщиной 770 мм из керамических камней с облицовкой лицевым кирпичом, типовой этаж жилой секции.
+
+    '
+  volume: {value: 62.5, unit: м3}
+  conditions:
+    season: null
+    floor_height_m: null
+    lifting: башенный кран
+  masked_fields: [crew_composition, qualifications, labor_norm, winter_coefficient]
+  resource_catalog:
+    roles: [каменщик 2 разр., каменщик 3 разр., каменщик 4 разр., каменщик 5 разр., плотник 4 разр., монтажник-такелажник 2 разр.]
+    equipment: [кран башенный, установка для подачи раствора, подмости]
+  variants:
+    V1: полное описание (как выше)
+    V2: наружные стены 770 мм, 62,5 м3
+    V3: бригада для кладки толстых наружных стен с лицевым кирпичом
+
+sources:
+  - {id: SRC.TTK_WALLS, role: example, use: main}
+  - {id: SRC.GESN_2022, role: norm, use: distractor}
+
+gold:
+  claims:
+
+    - id: C1
+      entity: кладка наружных несущих стен секций 5, 6, 7, звено «четверка»
+      attribute: состав звена
+      value: каменщик 4-5 разр. x1; каменщик 3 разр. x1; каменщик 2 разр. x2
+      src: {doc: SRC.TTK_WALLS, pdf_page: 15, section: 'п. 5.2, рис. 10', quote: К - каменщик 4- 5 разряда}
+      basis: document
+      check: confirmed
+      mandatory: true
+      why_mandatory: item 5.2 explicitly ties the crew to the external load-bearing walls of sections 5-7
+
+    - id: C2
+      entity: кладка наружных несущих стен толщиной 770 мм из керамических камней с облицовкой лицевым кирпичом
+      attribute: норма времени
+      value: 3.1
+      unit: чел.-ч/м3
+      src: {doc: SRC.TTK_WALLS, pdf_page: 26, section: 'табл. 6.1, п. 1; основание ЕНиР §Е3-8, табл. 2, №2а', quote: толщиной 770 мм из}
+      basis: document
+      check: confirmed
+      mandatory: false
+      note: 'units of measurement verified against the page image: m3'
+
+    - id: C3
+      entity: тот же вид работ, секция 5
+      attribute: трудозатраты на объём
+      value: 193.75
+      unit: чел.-ч
+      src: {doc: SRC.TTK_WALLS, pdf_page: 26, section: 'табл. 6.1, п. 1, объём 62,5 м3', quote: '62,5'}
+      basis: document
+      check: confirmed
+      mandatory: false
+      note: '62.5 x 3.1 = 193.75: agrees with the table'
+
+    - id: C4
+      entity: работы в зимних условиях (декабрь-март), г. Санкт-Петербург
+      attribute: поправочный коэффициент к нормам времени
+      value: 1.13
+      src: {doc: SRC.TTK_WALLS, pdf_page: 32, section: 'примечание к табл. 6.1-6.3, ЕНиР Общая часть, прил. 3, табл. 1', quote: 'К= 1,13'}
+      basis: document
+      check: confirmed_partly
+      mandatory: false
+      applicability: only if the season is winter and the site is in Saint Petersburg; the season is not specified in the request, so do not apply by default
+
+    - id: C5
+      entity: подача материалов для кладки стен и монтажа перемычек
+      attribute: подъёмное оборудование
+      value: башенные краны КБ-503 и КБ-403
+      src: {doc: SRC.TTK_WALLS, pdf_page: 2, section: п. 1.3, quote: башенными кранами КБ - 503 и КБ- 403}
+      basis: document
+      check: confirmed
+      mandatory: false
+
+    - id: C6
+      entity: рабочие, принимающие груз на рабочих местах каменщиков
+      attribute: требование к допуску
+      value: обучены и имеют удостоверение стропальщика; радиотелефонная связь с машинистом башенного крана
+      src: {doc: SRC.TTK_WALLS, pdf_page: 33, section: п. 8.3, quote: удостоверение стропальщика}
+      basis: document
+      check: confirmed
+      mandatory: true
+      why_mandatory: the request condition "tower crane" matches the card's condition; the safety requirement is named explicitly
+
+  derived:
+    - {id: D1, formula: 'H = q x n x k = 62,5 x 3,1 x 1,0', value: 193.75, unit: чел.-ч}
+    - {id: D2, formula: 'd = H / m = 193,75 / 4 (m = 4 people of the «четверка» crew, η = 1)', value: 48.44, unit: 'ч (6,05 смены по 8 ч)', note: 'idealized estimate: all four work simultaneously
+        without losses'}
+    - {id: D3, formula: 'winter: H = 193,75 x 1,13', value: 218.94, unit: чел.-ч, d_hours: 54.73, shifts_8h: 6.84}
+
+  admissible_modes:
+
+    - mode_id: M1
+      roles: [{role: каменщик, grade: 4, count: 1}, {role: каменщик, grade: 3, count: 1}, {role: каменщик, grade: 2, count: 2}]
+      labor:
+        q: 62.5
+        n: 3.1
+        k: 1.0
+        H: 193.75
+        m: 4
+        eta: 1
+        d_hours: 48.44
+        d_shifts_8h: 6.05
+      equipment: [башенный кран КБ-403 или КБ-503]
+      supported_by: [C1, C2, C3, C5, C6]
+      admissible: true
+
+    - mode_id: M2
+      roles: [{role: каменщик, grade: 5, count: 1}, {role: каменщик, grade: 3, count: 1}, {role: каменщик, grade: 2, count: 2}]
+      labor:
+        q: 62.5
+        n: 3.1
+        k: 1.0
+        H: 193.75
+        m: 4
+        eta: 1
+        d_hours: 48.44
+        d_shifts_8h: 6.05
+      equipment: [башенный кран КБ-403 или КБ-503]
+      supported_by: [C1, C2, C3, C5, C6]
+      admissible: true
+      why: item 5.2 names a range of "grade 4-5"
+
+  not_found:
+    - {id: U1, what: GESN norm for a 770 mm wall with cladding, note: 'Table 08-02-010, GESN-2022 p. 16: no 770 mm thickness.'}
+    - {id: U2, what: grade of the tower crane operator, note: the technological card names the cranes but not the grade}
+    - {id: U3, what: number of riggers or slingers as a separate role, note: 'item 8.3 gives a requirement (certificate), the number is not specified'}
+    - {id: U4, what: winter coefficient for a site outside Saint Petersburg, note: K = 1.13 is given only for Saint Petersburg}
+    - {id: U5, what: proof that m = 4 is the number of simultaneously working people, note: 'a crew of 4 people is set by the technological card item 5.2, but the length of the work
+        section and the admissibility of four people working simultaneously on the given volume of 62.5 m3 are not verified in the package; the formula with η = 1 does not verify this'}
+
+  traps:
+    - {id: T1, wrong: '3,85 чел.-ч/м3', why: '08-02-008-01 is for simple walls without cladding, up to 4 m; GESN-2022 pp. 1, 14.'}
+    - {id: T2, wrong: 'применить K = 1,13 без указания зимы и Санкт-Петербурга', why: the coefficient is conditional (C4)}
+    - {id: T3, wrong: звено «двойка» каменщик 3-4 разр. + каменщик 2 разр., why: 'this is the crew for internal load-bearing walls and partitions (item 5.5, pp. 23-24)'}
+    - {id: T4, wrong: норма 08-02-010-05 (640 мм) как «ближайшая» к 770 мм, why: 'different thickness, the transfer is not justified'}
+
+pass_criteria:
+  must:
+    - '«four-person» crew: grade 4-5 x1, grade 3 x1, grade 2 x2, with a source (technological card item 5.2)'
+    - norm of 3.1 person-hours/m3 with a source (technological card table 6.1, ENiR)
+    - the "slinger" condition for workers receiving the load
+    - 'duration is computed by H = q·n·k and d = H/m: 193.75 person-hours and 48.44 h at m = 4; in winter 218.94 person-hours and 54.73 h, with a caveat about Saint Petersburg'
+    - U1-U5 are named as unknown or conditional
+  must_not:
+    - values from traps T1-T4
+    - a mandatory requirement without a source reference
+
+open_for_expert:
+  - whether to consider the ENiR norm (an outdated document) an admissible basis if GESN gives no direct norm
+  - whether it is admissible to use 08-02-008-01 as an approximation (without cladding)
+  - whether m = 4 (all crew members working simultaneously) can be accepted for a volume of 62.5 m3; does the technological card set a limit
+  - 'hypothetical values: resource catalog, crane, floor height'
+
+notes: 'The package shows that a "standard" package is rarely "clean": the answer lies in a single document, but neighboring standards give plausible but inapplicable values. Checking
+  the applicability of norms matters more than searching.
+
+  '

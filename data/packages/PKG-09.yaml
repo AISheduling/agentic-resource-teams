@@ -1,0 +1,117 @@
+id: PKG-09
+title: Simple internal reinforced brick wall with openings
+status: checked_against_pdf
+kind: standard
+why_this_kind: Direct labor-process card example; full site applicability remains conditional.
+
+input:
+  work_description: Кладка простых внутренних кирпичных стен толщиной 510 мм с проемами под штукатурку с армированием металлическими сетками. Летний период, материалы на рабочем месте.
+  volume: {value: 10, unit: м3}
+  conditions:
+    season: summer
+    floor_height_m: 3
+    lifting: null
+  masked_fields: [crew_composition, qualifications, headcount, labor_norm, equipment]
+  resource_catalog:
+    roles: [каменщик 2 разр., каменщик 3 разр., каменщик 4 разр., каменщик 5 разр.]
+    equipment: [подмости, кельма, причальный шнур, уровень]
+  variants:
+    V1: Кладка простых внутренних кирпичных стен толщиной 510 мм с проемами под штукатурку с армированием металлическими сетками. Летний период, материалы на рабочем месте.
+    V2: Кладка простых внутренних кирпичных стен толщиной 510 мм с проемами под штукатурку с армированием металлическими сетками, 10 м3
+    V3: 'Подобрать звено для: Кладка простых внутренних кирпичных стен толщиной 510 мм с проемами под штукатурку с армированием металлическими сетками. Летний период, материалы на рабочем
+      месте.'
+
+sources:
+  - {id: SRC.LABOR_7353, role: labor_process_card, use: main}
+  - {id: SRC.GESN_2022, role: norm, use: context_only}
+  - {id: SRC.PROFSTD_MASON, role: professional_standard, use: context_only}
+
+gold:
+  claims:
+
+    - id: C1
+      entity: кладка стен 510 мм
+      attribute: состав звена
+      value: каменщик 3 разр.; каменщик 3 разр.
+      src: {doc: SRC.LABOR_7353, pdf_page: 30, section: '2.1', quote: Каменщик 3 разряда (К-1) — 1 чел.; Каменщик 3 разряда (К-2) — 1 чел.}
+      basis: document
+      check: confirmed
+      mandatory: false
+      applicability: Card example; not a universal minimum crew.
+
+    - id: C2
+      entity: кладка стен 510 мм
+      attribute: затраты труда
+      value: 2.52
+      src: {doc: SRC.LABOR_7353, pdf_page: 30, section: '1.2', quote: '2,52'}
+      basis: document
+      check: confirmed
+      mandatory: false
+      unit: чел.-ч/м3
+      applicability: Labor-process card including reinforcement; not a GESN estimate.
+
+    - id: C3
+      entity: кладка стен 510 мм
+      attribute: средства подмащивания
+      value: подмости
+      src: {doc: SRC.LABOR_7353, pdf_page: 30, section: '3.1', quote: установить при необходимости средства подмащивания}
+      basis: document
+      check: confirmed
+      mandatory: false
+      applicability: Only when required by work tier.
+
+    - id: C4
+      entity: кладка стен 510 мм
+      attribute: инструмент
+      value: причальный шнур
+      src: {doc: SRC.LABOR_7353, pdf_page: 31, section: '4.2', quote: причального шнура}
+      basis: document
+      check: confirmed
+      mandatory: false
+
+  derived:
+    - {id: D1, formula: H = 10 * 2.52 * 1, value: 25.2, unit: чел.-ч}
+    - {id: D2, formula: d = H / 2, value: 12.6, unit: ч}
+
+  admissible_modes:
+
+    - mode_id: M1
+      roles: [{role: каменщик, grade: 3, count: 2}]
+      labor:
+        q: 10
+        n: 2.52
+        k: 1
+        H: 25.2
+        m: 2
+        eta: 1
+        d_hours: 12.6
+        d_shifts_8h: 1.575
+      equipment: [подмости, причальный шнур]
+      supported_by: [C1, C2, C3, C4]
+      admissible: conditional
+      why: Card-based candidate; actual work tier, equipment capacity and simultaneous work need verification.
+
+  not_found:
+    - {id: U1, what: actual equipment count and load capacity, note: Not established for the synthetic site.}
+    - {id: U2, what: simultaneous work feasibility, note: Requires work-front and site review.}
+    - {id: U3, what: complete GESN estimate including reinforcement, note: Separate scope and units must be checked before comparison.}
+
+  traps:
+    - {id: T1, wrong: каменщик 4 разр. + каменщик 2 разр., why: Different 380 mm card.}
+    - {id: T2, wrong: treat card crew as universal legal requirement, why: Example is not a legal minimum.}
+    - {id: T3, wrong: add GESN reinforcement labor to the card rate, why: Card rate already includes reinforcement.}
+
+pass_criteria:
+  must:
+    - Recover card crew and labor rate with citations.
+    - Compute H and d under stated assumptions.
+    - Keep site applicability conditional.
+  must_not:
+    - Invent mandatory grades or equipment quantities.
+    - Mix card and GESN rates.
+
+open_for_expert:
+  - Confirm work-front feasibility and complete equipment list.
+  - Confirm whether a separate GESN-based alternative is useful.
+
+notes: Synthetic input and resource catalog; source facts are documentary examples, not observed site data. Expert review pending. PDF page numbering starts at 1.
